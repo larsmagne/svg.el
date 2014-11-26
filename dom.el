@@ -27,32 +27,26 @@
 
 (require 'cl-lib)
 
-(defmacro dom-tag (node)
+(defsubst dom-tag (node)
   "Return the NODE tag."
-  (let ((n (gensym)))
-    `(let ((,n ,node))
-       ;; Called on a list of nodes.  Use the first.
-       (if (consp (car ,n))
-	   (caar ,n)
-	 (car ,n)))))
+  ;; Called on a list of nodes.  Use the first.
+  (if (consp (car node))
+      (caar node)
+    (car node)))
 
-(defmacro dom-attributes (node)
+(defsubst dom-attributes (node)
   "Return the NODE attributes."
-  (let ((n (gensym)))
-    `(let ((,n ,node))
-       ;; Called on a list of nodes.  Use the first.
-       (if (consp (car ,n))
-	   (cadr (car ,n))
-	 (cadr ,n)))))
+  ;; Called on a list of nodes.  Use the first.
+  (if (consp (car node))
+      (cadr (car node))
+    (cadr node)))
 
-(defmacro dom-children (node)
+(defsubst dom-children (node)
   "Return the NODE children."
-  (let ((n (gensym)))
-    `(let ((,n ,node))
-       ;; Called on a list of nodes.  Use the first.
-       (if (consp (car ,n))
-	   (nthcdr 2 (car ,n))
-	 (nthcdr 2 ,n)))))
+  ;; Called on a list of nodes.  Use the first.
+  (if (consp (car node))
+      (cddr (car node))
+    (cddr node)))
 
 (defun dom-set-attributes (node attributes)
   "Set the attributes of NODE to ATTRIBUTES."
@@ -74,7 +68,7 @@ A typical attribute is `href'."
 
 (defun dom-text (node)
   "Return all the text bits in the current node concatenated."
-  (mapconcat 'identity (cl-remove-if-not 'stringp (dom-childred node)) " "))
+  (mapconcat 'identity (cl-remove-if-not 'stringp (dom-children node)) " "))
 
 (defun dom-texts (node &optional separator)
   "Return all textual data under NODE concatenated with SEPARATOR in-between."
