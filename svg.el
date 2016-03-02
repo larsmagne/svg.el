@@ -184,7 +184,7 @@ POINTS is a list of x/y pairs."
    (with-temp-buffer
      (svg-print svg)
      (buffer-string))
-   'svg t))      
+   'svg t))
 
 (defun svg-insert-image (svg)
   "Insert SVG as an image at point.
@@ -193,7 +193,7 @@ If the SVG is later changed, the image will also be updated."
 	(marker (point-marker)))
     (insert-image image)
     (dom-set-attribute svg :image marker)))
-    
+
 (defun svg-possibly-update-image (svg)
   (let ((marker (dom-attr svg :image)))
     (when (and marker
@@ -203,6 +203,8 @@ If the SVG is later changed, the image will also be updated."
 
 (defun svg-print (dom)
   "Convert DOM into a string containing the xml representation."
+  (if (stringp dom)
+      (insert dom)
   (insert (format "<%s" (car dom)))
   (dolist (attr (nth 1 dom))
     ;; Ignore attributes that start with a colon.
@@ -212,7 +214,7 @@ If the SVG is later changed, the image will also be updated."
   (dolist (elem (nthcdr 2 dom))
     (insert " ")
     (svg-print elem))
-  (insert (format "</%s>" (car dom))))
+  (insert (format "</%s>" (car dom)))))
 
 (provide 'svg)
 

@@ -115,15 +115,16 @@ A name is a symbol like `td'."
 (defun dom-elements (dom attribute match)
   "Find elements matching MATCH (a regexp) in ATTRIBUTE.
 ATTRIBUTE would typically be `class', `id' or the like."
-  (let ((matches (cl-loop for child in (dom-children dom)
-			  for matches = (dom-elements child attribute match)
-			  when matches
-			  append matches))
-	(attr (dom-attr dom attribute)))
-    (if (and attr
-	     (string-match match attr))
-	(cons dom matches)
-      matches)))
+  (unless (stringp dom)
+    (let ((matches (cl-loop for child in (dom-children dom)
+			    for matches = (dom-elements child attribute match)
+			    when matches
+			    append matches))
+	  (attr (dom-attr dom attribute)))
+      (if (and attr
+	       (string-match match attr))
+	  (cons dom matches)
+	matches))))
 
 (defun dom-parent (dom node)
   "Return the parent of NODE in DOM."
