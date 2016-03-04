@@ -131,6 +131,27 @@ POINTS is a list of x/y pairs."
 			    ", "))
       ,@(svg-arguments svg args)))))
 
+(defun svg-text (svg x y text &rest args)
+  "Create a piece of text at point X, Y on SVG.
+with contents TEXT."
+  (svg-append
+   svg
+   (dom-node
+    'text
+    `((x . ,x)
+      (y . ,y)
+      ,@(svg-arguments svg args))
+    text)))
+
+(defun svg-insert-string (svg string &optional id-regexp)
+  "Insert STRING inside of SVG. If ID-REGEXP is defined then "
+  (let ((old (and id-regexp
+		  (dom-by-id svg (concat "\\`" (regexp-quote id-regexp) "\\'")))))
+    (if old
+	(dom-append-child old string)
+      (dom-append-child svg string))
+    (svg-possibly-update-image svg)))
+
 (defun svg-append (svg node)
   (let ((old (and (dom-attr node 'id)
 		  (dom-by-id svg (concat "\\`" (regexp-quote (dom-attr node 'id))
@@ -205,16 +226,16 @@ If the SVG is later changed, the image will also be updated."
   "Convert DOM into a string containing the xml representation."
   (if (stringp dom)
       (insert dom)
-  (insert (format "<%s" (car dom)))
-  (dolist (attr (nth 1 dom))
-    ;; Ignore attributes that start with a colon.
-    (unless (= (aref (format "%s" (car attr)) 0) ?:)
-      (insert (format " %s=\"%s\"" (car attr) (cdr attr)))))
-  (insert ">")
-  (dolist (elem (nthcdr 2 dom))
-    (insert " ")
-    (svg-print elem))
-  (insert (format "</%s>" (car dom)))))
+    (insert (format "<%s" (car dom)))
+    (dolist (attr (nth 1 dom))
+      ;; Ignore attributes that start with a colon.
+      (unless (= (aref (format "%s" (car attr)) 0) ?:)
+	(insert (format " %s=\"%s\"" (car attr) (cdr attr)))))
+    (insert ">")
+    (dolist (elem (nthcdr 2 dom))
+      (insert " ")
+      (svg-print elem))
+    (insert (format "</%s>" (car dom)))))
 
 (provide 'svg)
 
