@@ -131,6 +131,27 @@ POINTS is a list of x/y pairs."
 			    ", "))
       ,@(svg-arguments svg args)))))
 
+(defun svg-text (svg x y text &rest args)
+  "Create a piece of text at point X, Y on SVG.
+with contents TEXT."
+  (svg-append
+   svg
+   (dom-node
+    'text
+    `((x . ,x)
+      (y . ,y)
+      ,@(svg-arguments svg args))
+    text)))
+
+(defun svg-insert-string (svg string &optional id-regexp)
+  "Insert STRING inside of SVG. If ID-REGEXP is defined then "
+  (let ((old (and id-regexp
+		  (dom-by-id svg (concat "\\`" (regexp-quote id-regexp) "\\'")))))
+    (if old
+	(dom-append-child old string)
+      (dom-append-child svg string))
+    (svg-possibly-update-image svg)))
+
 (defun svg-append (svg node)
   (let ((old (and (dom-attr node 'id)
 		  (dom-by-id svg (concat "\\`" (regexp-quote (dom-attr node 'id))
@@ -184,7 +205,7 @@ POINTS is a list of x/y pairs."
    (with-temp-buffer
      (svg-print svg)
      (buffer-string))
-   'svg t))      
+   'svg t))
 
 (defun svg-insert-image (svg)
   "Insert SVG as an image at point.
@@ -193,7 +214,7 @@ If the SVG is later changed, the image will also be updated."
 	(marker (point-marker)))
     (insert-image image)
     (dom-set-attribute svg :image marker)))
-    
+
 (defun svg-possibly-update-image (svg)
   (let ((marker (dom-attr svg :image)))
     (when (and marker
@@ -203,16 +224,18 @@ If the SVG is later changed, the image will also be updated."
 
 (defun svg-print (dom)
   "Convert DOM into a string containing the xml representation."
-  (insert (format "<%s" (car dom)))
-  (dolist (attr (nth 1 dom))
-    ;; Ignore attributes that start with a colon.
-    (unless (= (aref (format "%s" (car attr)) 0) ?:)
-      (insert (format " %s=\"%s\"" (car attr) (cdr attr)))))
-  (insert ">")
-  (dolist (elem (nthcdr 2 dom))
-    (insert " ")
-    (svg-print elem))
-  (insert (format "</%s>" (car dom))))
+  (if (stringp dom)
+      (insert dom)
+    (insert (format "<%s" (car dom)))
+    (dolist (attr (nth 1 dom))
+      ;; Ignore attributes that start with a colon.
+      (unless (= (aref (format "%s" (car attr)) 0) ?:)
+	(insert (format " %s=\"%s\"" (car attr) (cdr attr)))))
+    (insert ">")
+    (dolist (elem (nthcdr 2 dom))
+      (insert " ")
+      (svg-print elem))
+    (insert (format "</%s>" (car dom)))))
 
 (provide 'svg)
 

@@ -9,5 +9,5 @@
 	      :stroke "green" :id "poly1")
 (svg-polygon svg '((100 . 100) (200 . 150) (150 . 90))
 	     :stroke "blue" :fill "red" :id "gon1")
-
-  
+(svg-text svg 500 500 "First " :id "mytext" :font-size 40 :fill "red" :stroke "purple" :text-anchor "middle" :dy "-.37em" :stroke-width 1)
+(svg-string svg "test2" "mytext")
